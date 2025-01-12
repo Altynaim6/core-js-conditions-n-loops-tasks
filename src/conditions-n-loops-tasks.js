@@ -231,81 +231,143 @@ function getSpiralMatrix(size) {
 }
 
 function rotateMatrix(matrix) {
-  const n = matrix.length;
-  const result = new Array(n).fill(null).map(() => new Array(n));
-  for (let i = 0; i < n; i += 1) {
-    for (let j = 0; j < n; j += 1) {
-      result[j][n - 1 - i] = matrix[i][j];
+  const matrixLength = matrix.length;
+  const rotatedMatrix = matrix;
+  function add(a, b) {
+    return a + b;
+  }
+
+  function subtract(a, b) {
+    return a - b;
+  }
+
+  for (let i = 0; i < matrixLength; i = add(i, 1)) {
+    for (let j = i; j < matrixLength; j = add(j, 1)) {
+      const temp = rotatedMatrix[i][j];
+      rotatedMatrix[i][j] = rotatedMatrix[j][i];
+      rotatedMatrix[j][i] = temp;
     }
   }
-  return result;
+
+  for (let i = 0; i < matrixLength; i = add(i, 1)) {
+    let start = 0;
+    let end = subtract(matrixLength, 1);
+    while (start < end) {
+      const temp = rotatedMatrix[i][start];
+      rotatedMatrix[i][start] = rotatedMatrix[i][end];
+      rotatedMatrix[i][end] = temp;
+      start = add(start, 1);
+      end = subtract(end, 1);
+    }
+  }
+
+  return rotatedMatrix;
 }
 
 function sortByAsc(arr) {
-  const arrCopy = [...arr];
+  const arrCopy = arr;
+
   function partition(start, end) {
     const pivot = arrCopy[end];
-    let pivotIndex = start;
-    for (let i = start; i < end; i += 1) {
-      if (arrCopy[i] < pivot) {
+    let i = start - 1;
+
+    for (let j = start; j < end; j += 1) {
+      if (arrCopy[j] <= pivot) {
+        i += 1;
         const temp = arrCopy[i];
-        arrCopy[i] = arrCopy[pivotIndex];
-        arrCopy[pivotIndex] = temp;
-        pivotIndex += 1;
+        arrCopy[i] = arrCopy[j];
+        arrCopy[j] = temp;
       }
     }
-    const temp = arrCopy[pivotIndex];
-    arrCopy[pivotIndex] = arrCopy[end];
+
+    const temp = arrCopy[i + 1];
+    arrCopy[i + 1] = arrCopy[end];
     arrCopy[end] = temp;
-    return pivotIndex;
-  }
-  function quickSort(start, end) {
-    if (start >= end) return;
-    const pivotIndex = partition(start, end);
-    quickSort(start, pivotIndex - 1);
-    quickSort(pivotIndex + 1, end);
+
+    return i + 1;
   }
 
-  quickSort(0, arrCopy.length - 1);
+  function sort(start, end) {
+    if (start >= end) {
+      return;
+    }
+
+    const pivotIndex = partition(start, end);
+    sort(start, pivotIndex - 1);
+    sort(pivotIndex + 1, end);
+  }
+
+  sort(0, arrCopy.length - 1);
+
   return arrCopy;
 }
 
 function shuffleChar(str, iterations) {
-  let shuffledStr = str;
-  for (let i = 0; i < iterations; i += 1) {
-    let result = '';
-    const len = shuffledStr.length;
-    for (let j = 0; j < len; j += 1) {
+  if (iterations === 0 || str.length <= 2) {
+    return str;
+  }
+
+  let result = str;
+  for (let i = 1; i <= iterations; i += 1) {
+    let evenChars = '';
+    let oddChars = '';
+
+    for (let j = 0; j < str.length; j += 1) {
       if (j % 2 === 0) {
-        result += shuffledStr[j];
+        evenChars += result[j];
       } else {
-        result += shuffledStr[j];
+        oddChars += result[j];
       }
     }
-    shuffledStr = result;
+
+    result = evenChars + oddChars;
+    if (result === str) return shuffleChar(str, iterations % i);
   }
-  return shuffledStr;
+
+  return result;
 }
 
 function getNearestBigger(number) {
-  const digits = [...String(number)].map(Number);
+  const digits = [];
+  let tempNumber = number;
+
+  while (tempNumber > 0) {
+    digits.push(tempNumber % 10);
+    tempNumber = Math.floor(tempNumber / 10);
+  }
+
+  digits.reverse();
+
   let i = digits.length - 2;
   while (i >= 0 && digits[i] >= digits[i + 1]) {
     i -= 1;
   }
-  if (i === -1) {
+
+  if (i < 0) {
     return number;
   }
+
   let j = digits.length - 1;
   while (digits[j] <= digits[i]) {
     j -= 1;
   }
+
   [digits[i], digits[j]] = [digits[j], digits[i]];
-  const resultDigits = [
-    ...digits.slice(0, i + 1),
-    ...digits.slice(i + 1).reverse(),
-  ];
-  const result = Number(resultDigits.join(''));
+
+  let left = i + 1;
+  let right = digits.length - 1;
+
+  while (left < right) {
+    [digits[left], digits[right]] = [digits[right], digits[left]];
+    left += 1;
+    right -= 1;
+  }
+
+  let result = 0;
+  for (let k = 0; k < digits.length; k += 1) {
+    result = result * 10 + digits[k];
+  }
+
   return result;
 }
 
